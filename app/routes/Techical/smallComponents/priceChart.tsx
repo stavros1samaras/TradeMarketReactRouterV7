@@ -131,8 +131,8 @@ export default function PriceChart({ chartData }: props) {
                     <CartesianGrid strokeDasharray="100 100" vertical={false} />
                     <XAxis dataKey="Date" interval={datesPerPeriod}
                         tickFormatter={(date, index) => {
-                            if (index === 0) return ""; // κρύβει την πρώτη τιμή
-                            return date.split("T")[0]; // κρατά μόνο το μέρος πριν το T
+                            if (index === 0) return ""; // krivei tin prwti timi
+                            return date.split("T")[0]; // krata tin imerominia prin to T
                         }} />
                     <YAxis domain={['dataMin-1000', 'dataMax+1000']} />
                     <Tooltip />
