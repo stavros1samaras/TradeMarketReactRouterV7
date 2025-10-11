@@ -1,95 +1,64 @@
-import { useRef } from "react";
+import { useState } from "react";
+import { Form, redirect } from "react-router";
+import type { Route } from "./+types/contactLayout";
 
+export async function clientAction({ request }: Route.ClientActionArgs) {
 
-export default function ContactLayout() {
+    let formData = await request.formData();
+    let name = formData.get("name");
+    let email = formData.get("email");
 
-    const nameInput = useRef<HTMLInputElement>(null);
-    const emailInput = useRef<HTMLInputElement>(null);
-    const textInput = useRef<HTMLTextAreaElement>(null);
+    console.log(name);
+    console.log(formData);
 
-    async function submit(e: any): Promise<void> {
-        e.preventDefault();
+    let errorsArray: string[] = [];
 
-        // const data: {
-        //     name: string,
-        //     email: string,
-        //     message: string
-
-        // } = {
-        //     name: nameInput.current?.value || "",
-        //     email: emailInput.current?.value || "",
-        //     message: textInput.current?.value || "",
-        // }
-
-        const data: {
-            name: string,
-            email: string,
-            message: string
-
-        } = {
-            name: nameInput.current!.value,
-            email: emailInput.current!.value,
-            message: textInput.current!.value,
-        }
-
-        console.log(JSON.stringify(data));
-
-        try {
-            const response = await fetch("https://formspree.io/f/xovnojjj", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify(data),
-            });
-
-            if (response.ok) {
-                alert("Message sent!");
-            } else {
-                alert("Something went wrong.");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Error sending message.");
-        }
+    if (!email?.toString().includes("_")) {
+        errorsArray.push("Invalid email address");
+        return errorsArray;
     }
 
+    try {
+        const response = await fetch("https://formspree.io/f/xovnojjj", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+            },
+            body: formData,
+        });
+        if (response.ok) {
+            alert("Message sent!");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error sending message.");
+    }
 
-    return (
-        <>
-            <div className="flex justify-between">
-                <div>
-                    <h2>
-                        Find us
-                    </h2>
-                    <div>stavros</div>
-                    <div>mwkos</div>
-                    <div>kwstas</div>
-                </div>
-                <div>
-                    <h2>Contact us</h2>
-                    <form onSubmit={(e) => submit(e)}>
-                        <fieldset>
-                            <label htmlFor="">Enter your name</label>
-                            <input type="text" name="name" ref={nameInput} />
-                        </fieldset>
-                        <fieldset>
-                            <label htmlFor="">Enter your email</label>
-                            <input type="email" name="email" ref={emailInput} />
-                        </fieldset>
-                        <fieldset>
-                            <label htmlFor="">Enter your message</label>
-                            <textarea name="text" ref={textInput}>
+    return redirect("/");
+}
 
-                            </textarea>
-                        </fieldset>
-                        <input type="submit" value="Submit" />
-                        <input type="reset" value="Reset" />
-
-                    </form>
-                </div>
-            </div>
-        </>
-    )
+export default function ContactLayout({ actionData }: Route.ComponentProps) {
+    return (<>
+        <h2>Contact us</h2>
+        <Form method="post">
+            <fieldset>
+                <label htmlFor="">Enter your name</label>
+                <input type="text" name="name" />
+            </fieldset>
+            <fieldset>
+                <label htmlFor="">Enter your email</label>
+                <input type="email" name="email" />
+            </fieldset>
+            <fieldset>
+                <label htmlFor="">Enter your message</label>
+                <textarea name="text" >
+                </textarea>
+            </fieldset>
+            {actionData && (
+                <p style={{ color: "red" }}>{actionData[0]}</p>
+            )}
+            <input type="submit" value="Submit" />
+            <input type="reset" value="Reset" />
+        </Form>
+    </>)
 }
